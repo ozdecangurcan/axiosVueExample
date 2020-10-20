@@ -36,6 +36,12 @@
       Oluşan Post
       <pre>{{ sendNewPostResult }}</pre>
     </div>
+
+    <ul v-if="errors && errors.length">
+      <li v-for="(error, index) of errors" :key="index">
+        {{ index + 1 }} - {{ error }}
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -58,14 +64,23 @@ export default {
   },
   methods: {
     sendNewPost() {
-      this.$axios
-        .post("/posts", this.newPost)
-        .then((response) => (this.sendNewPostResult = response.data))
-        .then((this.showResult = true))
-        .catch((error) => {
-          this.errors.push(error);
-        })
-        .finally(this.clear());
+      this.errors = [];
+
+      if (this.newPost.body == "" && this.newPost.title == "") {
+        this.errors.push("Title and Body are Required");
+      } else {
+        this.$axios
+          .post("/posts", this.newPost)
+          .then(
+            (response) => (this.sendNewPostResult = response.data),
+            (this.showResult = true)
+          )
+          .catch((error) => {
+            this.errors.push(error.message);
+            this.showResult = false;
+          })
+          .then.finally(this.clear());
+      }
     },
 
     clear() {
