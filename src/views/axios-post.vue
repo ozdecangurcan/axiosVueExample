@@ -4,19 +4,7 @@
       <div class="row">
         <div class="col-3"></div>
         <div class="col-6">
-          <form @submit.prevent="sendNewPost">
-            <div class="form-group">
-              <label for="Id">Id</label>
-              <input
-                type="text"
-                class="form-control"
-                id="Id"
-                placeholder="Id"
-                v-model="newPost.id"
-              />
-              <p>{{newPost.id}}</p>
-
-            </div>
+          <form @submit="sendNewPost">
             <div class="form-group">
               <label for="title">Title</label>
               <input
@@ -37,20 +25,14 @@
                 v-model="newPost.body"
               />
             </div>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              :disabled="inProgress"
-            >
-              Kaydet
-            </button>
+            <button type="submit" class="btn btn-primary">Kaydet</button>
           </form>
         </div>
         <div class="col-3"></div>
       </div>
     </div>
 
-    <div v-if="sendNewPostResult">
+    <div v-if="showResult">
       Oluşan Post
       <pre>{{ sendNewPostResult }}</pre>
     </div>
@@ -58,30 +40,37 @@
 </template>
 
 <script>
-
 export default {
   data() {
     return {
-      inProgress: false,
+      showResult: false,
       errors: [],
       newPost: {
+        title: "",
+        body: "",
+      },
+      sendNewPostResult: {
         id: "",
         title: "",
         body: "",
       },
-      sendNewPostResult: null,
     };
   },
   methods: {
     sendNewPost() {
-      this.inProgress = true;
       this.$axios
         .post("/posts", this.newPost)
         .then((response) => (this.sendNewPostResult = response.data))
+        .then((this.showResult = true))
         .catch((error) => {
           this.errors.push(error);
         })
-        .finally(() => (this.inProgress = false));
+        .finally(this.clear());
+    },
+
+    clear() {
+      this.newPost.title = "";
+      this.newPost.body = "";
     },
   },
 };
